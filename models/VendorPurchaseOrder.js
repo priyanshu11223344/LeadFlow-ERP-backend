@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 
-const orderItemSchema =
+const vendorPOItemSchema =
   new mongoose.Schema(
     {
       inventoryId: {
         type:
           mongoose.Schema.Types.ObjectId,
         ref: "Inventory",
+        required: true,
       },
 
       itemName: {
@@ -24,17 +25,7 @@ const orderItemSchema =
         required: true,
       },
 
-      allocatedQuantity: {
-        type: Number,
-        default: 0,
-      },
-      
-      dispatchedQuantity: {
-        type: Number,
-        default: 0,
-      },
-      
-      price: {
+      unitPrice: {
         type: Number,
         default: 0,
       },
@@ -42,7 +33,7 @@ const orderItemSchema =
     { _id: false }
   );
 
-const orderSchema =
+const vendorPurchaseOrderSchema =
   new mongoose.Schema(
     {
       poNumber: {
@@ -51,18 +42,25 @@ const orderSchema =
         unique: true,
       },
 
-      clientId: {
+      vendorId: {
         type:
           mongoose.Schema.Types.ObjectId,
-        ref: "Client",
+        ref: "Vendor",
         required: true,
       },
-      dealId: {
-        type:
-          mongoose.Schema.Types.ObjectId,
-        ref: "Deal",
-      },
-      items: [orderItemSchema],
+
+      requisitionIds: [
+        {
+          type:
+            mongoose.Schema.Types.ObjectId,
+          ref:
+            "PurchaseRequisition",
+        },
+      ],
+
+      items: [
+        vendorPOItemSchema,
+      ],
 
       totalAmount: {
         type: Number,
@@ -72,16 +70,13 @@ const orderSchema =
       status: {
         type: String,
         enum: [
-          "PENDING",
-          "ALLOCATED",
-          "PARTIALLY_ALLOCATED",
-          "PENDING_PROCUREMENT",
-          "READY_TO_DELIVER",
-          "PARTIALLY_DISPATCHED",
-          "DELIVERED",
-          "COMPLETED",
+          "DRAFT",
+          "ORDERED",
+          "PARTIALLY_RECEIVED",
+          "RECEIVED",
+          "CANCELLED",
         ],
-        default: "PENDING",
+        default: "DRAFT",
       },
     },
     {
@@ -90,4 +85,7 @@ const orderSchema =
   );
 
 module.exports =
-  mongoose.model("Order", orderSchema);
+  mongoose.model(
+    "VendorPurchaseOrder",
+    vendorPurchaseOrderSchema
+  );

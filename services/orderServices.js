@@ -1,10 +1,15 @@
 const Order = require("../models/Order");
 const Client = require("../models/Client");
 const Inventory = require("../models/Inventory");
-const createOrderService =
+const PurchaseRequisition =
+  require(
+    "../models/PurchaseRequisition"
+  );
+  const createOrderService =
   async (payload) => {
     const {
       clientId,
+      dealId,
       poNumber,
       items,
     } = payload;
@@ -37,17 +42,12 @@ const createOrderService =
           await Inventory.create({
             itemName:
               orderItem.itemName,
-
             sku:
               orderItem.sku,
-
             quantity: 0,
-
             minQuantity: 0,
-
             price:
               orderItem.price,
-
             status:
               "TO_BE_ORDERED",
           });
@@ -58,17 +58,12 @@ const createOrderService =
         processedItems.push({
           inventoryId:
             inventory._id,
-
           itemName:
             inventory.itemName,
-
           sku: inventory.sku,
-
           quantity:
             orderItem.quantity,
-
           allocatedQuantity: 0,
-
           price:
             orderItem.price,
         });
@@ -118,7 +113,7 @@ const createOrderService =
           "PENDING_PROCUREMENT";
       }
 
-      // UPDATE STATUS
+      // UPDATE INVENTORY STATUS
       if (
         inventory.status !==
         "TO_BE_ORDERED"
@@ -146,19 +141,14 @@ const createOrderService =
       processedItems.push({
         inventoryId:
           inventory._id,
-
         itemName:
           inventory.itemName,
-
         sku:
           inventory.sku,
-
         quantity:
           requested,
-
         allocatedQuantity:
           allocated,
-
         price:
           orderItem.price,
       });
@@ -168,14 +158,36 @@ const createOrderService =
         orderItem.price;
     }
 
+    // CREATE ORDER
     const order =
-      await Order.create({
-        poNumber,
-        clientId,
-        items: processedItems,
-        totalAmount,
-        status: orderStatus,
-      });
+  await Order.create({
+    poNumber,
+    clientId,
+    dealId,
+    items: processedItems,
+    totalAmount,
+    status: orderStatus,
+  });
+
+    // CREATE PURCHASE REQUISITIONS
+    for (const item of processedItems) {
+      const shortage =
+        item.quantity -
+        item.allocatedQuantity;
+
+      if (shortage > 0) {
+        await PurchaseRequisition.create({
+          orderId: order._id,
+          inventoryId:
+            item.inventoryId,
+          itemName:
+            item.itemName,
+          sku: item.sku,
+          requiredQuantity:
+            shortage,
+        });
+      }
+    }
 
     return order;
   };
@@ -183,6 +195,7 @@ const createOrderService =
   async () => {
     return await Order.find()
       .populate("clientId")
+      .populate("dealId")
       .sort({
         createdAt: -1,
       });
@@ -191,7 +204,8 @@ const createOrderService =
   async (id) => {
     const order =
       await Order.findById(id)
-        .populate("clientId");
+        .populate("clientId")
+        .populate("dealId")
 
     if (!order) {
       throw new Error(

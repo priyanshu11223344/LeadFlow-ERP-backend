@@ -100,10 +100,17 @@ const deleteDealService=async(id)=>{
         message:"Deal Deleted Successfully"
     }
 }
-module.exports = {
+const getDealsByLeadService =
+  async (leadId) => {
+    return await Deal.find({
+      leadId,
+    }).populate("leadId");
+  };
+  module.exports = {
     createDealService,
     getDealsService,
     getDealByIdService,
     updateDealService,
     deleteDealService,
-};
+    getDealsByLeadService,
+  };

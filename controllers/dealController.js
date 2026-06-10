@@ -4,6 +4,7 @@ const {
   getDealByIdService,
   updateDealService,
   deleteDealService,
+  getDealsByLeadService,
 } = require("../services/dealServices");
 
 // CREATE DEAL
@@ -110,11 +111,30 @@ const deleteDeal = async (req, res) => {
     });
   }
 };
+const getDealsByLead =
+  async (req, res) => {
+    try {
+      const deals =
+        await getDealsByLeadService(
+          req.params.leadId
+        );
 
-module.exports = {
-  createDeal,
-  getDeals,
-  getDealById,
-  updateDeal,
-  deleteDeal,
-};
+      res.status(200).json({
+        success: true,
+        data: deals,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+  module.exports = {
+    createDeal,
+    getDeals,
+    getDealById,
+    updateDeal,
+    deleteDeal,
+    getDealsByLead,
+  };

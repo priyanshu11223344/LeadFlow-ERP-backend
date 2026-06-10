@@ -24,6 +24,85 @@ app.use(
   "/api/orders",
   require("./routes/orderRoutes")
 );
+const vendorRoutes =
+  require(
+    "./routes/vendorRoutes"
+  );
+
+app.use(
+  "/api/vendors",
+  vendorRoutes
+);
+const purchaseRequisitionRoutes =
+  require(
+    "./routes/purchaseRequisitionRoutes"
+  );
+
+app.use(
+  "/api/purchase-requisitions",
+  purchaseRequisitionRoutes
+);
+const vendorPurchaseOrderRoutes =
+  require(
+    "./routes/vendorPurchaseOrderRoutes"
+  );
+
+app.use(
+  "/api/vendor-purchase-orders",
+  vendorPurchaseOrderRoutes
+);
+const grnRoutes =
+  require("./routes/grnRoutes");
+
+app.use(
+  "/api/grn",
+  grnRoutes
+);
+const dispatchRoutes =
+  require(
+    "./routes/dispatchRoutes"
+  );
+
+app.use(
+  "/api/dispatch",
+  dispatchRoutes
+);
+const invoiceRoutes =
+  require(
+    "./routes/invoiceRoutes"
+  );
+
+app.use(
+  "/api/invoices",
+  invoiceRoutes
+);
+const paymentRoutes =
+  require(
+    "./routes/paymentRoutes"
+  );
+
+app.use(
+  "/api/payments",
+  paymentRoutes
+);
+const dashboardRoutes =
+  require(
+    "./routes/dashboardRoutes"
+  );
+
+app.use(
+  "/api/dashboard",
+  dashboardRoutes
+);
+const reportRoutes =
+  require(
+    "./routes/reportRoutes"
+  );
+
+app.use(
+  "/api/reports",
+  reportRoutes
+);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
