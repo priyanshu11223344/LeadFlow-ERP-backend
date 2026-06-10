@@ -5,15 +5,30 @@ const {
   } = require(
     "../services/purchaseRequisitionServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const updatePurchaseRequisition =
     async (req, res) => {
       try {
         const requisition =
-          await updatePurchaseRequisitionService(
-            req.params.id,
-            req.body
-          );
+        await updatePurchaseRequisitionService(
+          req.params.id,
+          req.body
+        );
+      
+      await createAuditLog({
+        user: req.user,
+      
+        module: "Purchase Requisitions",
+      
+        action: "UPDATE",
+      
+        description:
+          `Updated Purchase Requisition ${requisition._id}`,
+      });
   
         res.status(200).json({
           success: true,

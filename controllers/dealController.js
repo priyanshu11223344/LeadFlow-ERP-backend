@@ -6,11 +6,29 @@ const {
   deleteDealService,
   getDealsByLeadService,
 } = require("../services/dealServices");
-
+const {
+  createAuditLog,
+} = require(
+  "../services/auditLogService"
+);
 // CREATE DEAL
 const createDeal = async (req, res) => {
   try {
-    const deal = await createDealService(req.body);
+    const deal =
+  await createDealService(
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Deals",
+
+  action: "CREATE",
+
+  description:
+    `Created deal ${deal.dealName} worth ₹${deal.amount}`,
+});
 
     res.status(201).json({
       success: true,
@@ -72,11 +90,51 @@ const getDealById = async (req, res) => {
 const updateDeal = async (req, res) => {
   try {
     const updatedDeal =
-      await updateDealService(
-        req.params.id,
-        req.body
-      );
+  await updateDealService(
+    req.params.id,
+    req.body
+  );
 
+await createAuditLog({
+  user: req.user,
+
+  module: "Deals",
+
+  action: "UPDATE",
+
+  description:
+    `Updated deal ${updatedDeal.dealName}`,
+});
+if (
+  req.body.status ===
+  "won"
+) {
+  await createAuditLog({
+    user: req.user,
+
+    module: "Deals",
+
+    action: "WON",
+
+    description:
+      `Deal ${updatedDeal.dealName} marked as won`,
+  });
+}
+if (
+  req.body.status ===
+  "lost"
+) {
+  await createAuditLog({
+    user: req.user,
+
+    module: "Deals",
+
+    action: "LOST",
+
+    description:
+      `Deal ${updatedDeal.dealName} marked as lost`,
+  });
+}
     res.status(200).json({
       success: true,
       message: "Deal updated successfully",
@@ -95,8 +153,26 @@ const updateDeal = async (req, res) => {
 // DELETE DEAL
 const deleteDeal = async (req, res) => {
   try {
-    const result =
-      await deleteDealService(req.params.id);
+    const deal =
+  await getDealByIdService(
+    req.params.id
+  );
+
+const result =
+  await deleteDealService(
+    req.params.id
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Deals",
+
+  action: "DELETE",
+
+  description:
+    `Deleted deal ${deal.dealName}`,
+});
 
     res.status(200).json({
       success: true,

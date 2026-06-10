@@ -5,15 +5,30 @@ const {
     updateInventoryService,
     deleteInventoryService,
   } = require("../services/inventoryServices");
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   // CREATE
   const createInventory =
     async (req, res) => {
       try {
         const item =
-          await createInventoryService(
-            req.body
-          );
+        await createInventoryService(
+          req.body
+        );
+      
+      await createAuditLog({
+        user: req.user,
+      
+        module: "Inventory",
+      
+        action: "CREATE",
+      
+        description:
+          `Created inventory item ${item.itemName}`,
+      });
   
         res.status(201).json({
           success: true,
@@ -75,10 +90,21 @@ const {
     async (req, res) => {
       try {
         const item =
-          await updateInventoryService(
-            req.params.id,
-            req.body
-          );
+  await updateInventoryService(
+    req.params.id,
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Inventory",
+
+  action: "UPDATE",
+
+  description:
+    `Updated inventory item ${item.itemName}`,
+});
   
         res.status(200).json({
           success: true,
@@ -98,10 +124,26 @@ const {
   const deleteInventory =
     async (req, res) => {
       try {
-        const result =
-          await deleteInventoryService(
-            req.params.id
-          );
+        const item =
+  await getInventoryByIdService(
+    req.params.id
+  );
+
+const result =
+  await deleteInventoryService(
+    req.params.id
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Inventory",
+
+  action: "DELETE",
+
+  description:
+    `Deleted inventory item ${item.itemName}`,
+});
   
         res.status(200).json({
           success: true,

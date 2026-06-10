@@ -3,11 +3,29 @@ const {
     getLeadsService,
     updateLeadService,
   } = require("../services/leadServices");
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   // CREATE LEAD
   const createLead = async (req, res) => {
     try {
-      const result = await createLeadService(req.body);
+      const result =
+  await createLeadService(
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Leads",
+
+  action: "CREATE",
+
+  description:
+    `Created lead ${result.name}`,
+});
   
       res.status(201).json({
         success: true,
@@ -43,10 +61,53 @@ const {
   // UPDATE LEAD
   const updateLead = async (req, res) => {
     try {
-      const updatedLead = await updateLeadService(
-        req.params.id,
-        req.body
-      );
+      const updatedLead =
+  await updateLeadService(
+    req.params.id,
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Leads",
+
+  action: "UPDATE",
+
+  description:
+    `Updated lead ${updatedLead.name}`,
+});
+if (
+  updatedLead.leadStage ===
+  "Won"
+) {
+  await createAuditLog({
+    user: req.user,
+
+    module: "Leads",
+
+    action: "WON",
+
+    description:
+      `Lead ${updatedLead.name} converted to client`,
+  });
+}
+
+if (
+  updatedLead.leadStage ===
+  "Lost"
+) {
+  await createAuditLog({
+    user: req.user,
+
+    module: "Leads",
+
+    action: "LOST",
+
+    description:
+      `Lead ${updatedLead.name} marked as lost`,
+  });
+}
   
       res.status(200).json({
         success: true,

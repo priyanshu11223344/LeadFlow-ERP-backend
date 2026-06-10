@@ -5,14 +5,29 @@ const {
   } = require(
     "../services/orderServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createOrder =
     async (req, res) => {
       try {
         const order =
-          await createOrderService(
-            req.body
-          );
+  await createOrderService(
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Orders",
+
+  action: "CREATE",
+
+  description:
+  `Created order ${order.poNumber} worth ₹${order.totalAmount}`
+});
   
         res.status(201).json({
           success: true,

@@ -5,14 +5,29 @@ const {
   } = require(
     "../services/vendorPurchaseOrderServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createVendorPurchaseOrder =
     async (req, res) => {
       try {
         const po =
-          await createVendorPurchaseOrderService(
-            req.body
-          );
+  await createVendorPurchaseOrderService(
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "Vendor Purchase Orders",
+
+  action: "CREATE",
+
+  description:
+    `Created Vendor PO ${po.poNumber}`,
+});
   
         res.status(201).json({
           success: true,

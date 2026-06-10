@@ -1,6 +1,16 @@
 const express =
   require("express");
 
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
+
+const authorizeRoles =
+  require(
+    "../middleware/roleMiddleware"
+  );
+
 const router =
   express.Router();
 
@@ -12,10 +22,44 @@ const {
   "../controllers/orderController"
 );
 
-router.post("/", createOrder);
+// CREATE ORDER
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  createOrder
+);
 
-router.get("/", getOrders);
+// GET ALL ORDERS
+router.get(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES",
+    "INVENTORY_MANAGER",
+    "PROCUREMENT_MANAGER",
+    "FINANCE"
+  ),
+  getOrders
+);
 
-router.get("/:id", getOrderById);
+// GET ORDER BY ID
+router.get(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES",
+    "INVENTORY_MANAGER",
+    "PROCUREMENT_MANAGER",
+    "FINANCE"
+  ),
+  getOrderById
+);
 
-module.exports = router;
+module.exports =
+  router;

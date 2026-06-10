@@ -1,6 +1,18 @@
-const express = require("express");
+const express =
+  require("express");
 
-const router = express.Router();
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
+
+const authorizeRoles =
+  require(
+    "../middleware/roleMiddleware"
+  );
+
+const router =
+  express.Router();
 
 const {
   createDeal,
@@ -8,28 +20,75 @@ const {
   getDealById,
   updateDeal,
   deleteDeal,
-  getDealsByLead
-} = require("../controllers/dealController");
+  getDealsByLead,
+} = require(
+  "../controllers/dealController"
+);
 
 // CREATE DEAL
-router.post("/", createDeal);
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  createDeal
+);
 
 // GET ALL DEALS
-router.get("/", getDeals);
+router.get(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  getDeals
+);
 
-
+// GET DEALS BY LEAD
 router.get(
   "/lead/:leadId",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
   getDealsByLead
 );
+
 // GET SINGLE DEAL
-router.get("/:id", getDealById);
+router.get(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  getDealById
+);
 
 // UPDATE DEAL
-router.put("/:id", updateDeal);
+router.put(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  updateDeal
+);
 
 // DELETE DEAL
-router.delete("/:id", deleteDeal);
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN"
+  ),
+  deleteDeal
+);
 
-
-module.exports = router;
+module.exports =
+  router;

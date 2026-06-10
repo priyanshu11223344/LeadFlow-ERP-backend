@@ -5,14 +5,29 @@ const {
   } = require(
     "../services/invoiceServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createInvoice =
     async (req, res) => {
       try {
         const invoice =
-          await createInvoiceService(
-            req.body
-          );
+        await createInvoiceService(
+          req.body
+        );
+      
+      await createAuditLog({
+        user: req.user,
+      
+        module: "Invoices",
+      
+        action: "CREATE",
+      
+        description:
+          `Created invoice ${invoice.invoiceNumber} worth ₹${invoice.amount}`,
+      });
   
         res.status(201).json({
           success: true,

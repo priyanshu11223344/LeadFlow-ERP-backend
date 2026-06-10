@@ -1,20 +1,58 @@
 const express = require("express");
 
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
+
+const authorizeRoles =
+  require(
+    "../middleware/roleMiddleware"
+  );
+
 const {
   createLead,
   getLeads,
   updateLead,
-} = require("../controllers/leadController");
+} = require(
+  "../controllers/leadController"
+);
 
-const router = express.Router();
+const router =
+  express.Router();
 
 // CREATE LEAD
-router.post("/", createLead);
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  createLead
+);
 
 // GET ALL LEADS
-router.get("/", getLeads);
+router.get(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  getLeads
+);
 
 // UPDATE LEAD
-router.patch("/:id", updateLead);
+router.patch(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "SALES"
+  ),
+  updateLead
+);
 
-module.exports = router;
+module.exports =
+  router;

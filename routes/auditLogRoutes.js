@@ -1,4 +1,14 @@
-const express = require("express");
+const express =
+  require("express");
+
+const router =
+  express.Router();
+
+const {
+  getAuditLogs,
+} = require(
+  "../controllers/auditLogController"
+);
 
 const authMiddleware =
   require(
@@ -10,24 +20,13 @@ const authorizeRoles =
     "../middleware/roleMiddleware"
   );
 
-const {
-  getClients,
-} = require(
-  "../controllers/clientController"
-);
-
-const router =
-  express.Router();
-
-// GET ALL CLIENTS
 router.get(
   "/",
   authMiddleware,
   authorizeRoles(
-    "ADMIN",
-    "SALES"
+    "ADMIN"
   ),
-  getClients
+  getAuditLogs
 );
 
 module.exports =

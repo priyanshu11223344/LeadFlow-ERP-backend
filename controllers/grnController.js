@@ -5,14 +5,29 @@ const {
   } = require(
     "../services/grnServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createGRN =
     async (req, res) => {
       try {
         const grn =
-          await createGRNService(
-            req.body
-          );
+  await createGRNService(
+    req.body
+  );
+
+await createAuditLog({
+  user: req.user,
+
+  module: "GRN",
+
+  action: "CREATE",
+
+  description:
+    `Created GRN ${grn.grnNumber}`,
+});
   
         res.status(201).json({
           success: true,

@@ -5,26 +5,41 @@ const {
   } = require(
     "../services/dispatchServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createDispatch =
-    async (req, res) => {
-      try {
-        const dispatch =
-          await createDispatchService(
-            req.body
-          );
-  
-        res.status(201).json({
-          success: true,
-          data: dispatch,
-        });
-      } catch (error) {
-        res.status(400).json({
-          success: false,
-          message: error.message,
-        });
-      }
-    };
+  async (req, res) => {
+    try {
+      const dispatch =
+        await createDispatchService(
+          req.body
+        );
+
+      await createAuditLog({
+        user: req.user,
+
+        module: "Dispatch",
+
+        action: "CREATE",
+
+        description:
+          `Created dispatch ${dispatch.dispatchNumber}`,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: dispatch,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
   
   const getDispatches =
     async (req, res) => {

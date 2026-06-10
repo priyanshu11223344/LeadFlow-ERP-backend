@@ -1,5 +1,15 @@
 const express = require("express");
 
+const authMiddleware =
+  require(
+    "../middleware/authMiddleware"
+  );
+
+const authorizeRoles =
+  require(
+    "../middleware/roleMiddleware"
+  );
+
 const {
   createInventory,
   getInventory,
@@ -10,21 +20,64 @@ const {
   "../controllers/inventoryController"
 );
 
-const router = express.Router();
+const router =
+  express.Router();
 
 // CREATE
-router.post("/", createInventory);
+router.post(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "INVENTORY_MANAGER"
+  ),
+  createInventory
+);
 
 // GET ALL
-router.get("/", getInventory);
+router.get(
+  "/",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "INVENTORY_MANAGER",
+    "PROCUREMENT_MANAGER"
+  ),
+  getInventory
+);
 
 // GET ONE
-router.get("/:id", getInventoryById);
+router.get(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "INVENTORY_MANAGER",
+    "PROCUREMENT_MANAGER"
+  ),
+  getInventoryById
+);
 
 // UPDATE
-router.patch("/:id", updateInventory);
+router.patch(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN",
+    "INVENTORY_MANAGER"
+  ),
+  updateInventory
+);
 
 // DELETE
-router.delete("/:id", deleteInventory);
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRoles(
+    "ADMIN"
+  ),
+  deleteInventory
+);
 
-module.exports = router;
+module.exports =
+  router;

@@ -5,14 +5,29 @@ const {
   } = require(
     "../services/paymentServices"
   );
-  
+  const {
+    createAuditLog,
+  } = require(
+    "../services/auditLogService"
+  );
   const createPayment =
     async (req, res) => {
       try {
         const payment =
-          await createPaymentService(
-            req.body
-          );
+        await createPaymentService(
+          req.body
+        );
+      
+      await createAuditLog({
+        user: req.user,
+      
+        module: "Payments",
+      
+        action: "CREATE",
+      
+        description:
+  `Recorded payment ${payment.paymentNumber} worth ₹${payment.amount}`
+      });
   
         res.status(201).json({
           success: true,
