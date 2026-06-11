@@ -65,21 +65,32 @@ const createDispatchService =
 
     // Update Order Status
     let fullyDispatched = true;
-
+    let anyDispatched = false;
+    
     for (const item of order.items) {
+    
+      if (
+        item.dispatchedQuantity > 0
+      ) {
+        anyDispatched = true;
+      }
+    
       if (
         item.dispatchedQuantity <
-        item.allocatedQuantity
+        item.quantity
       ) {
         fullyDispatched = false;
-        break;
       }
     }
+    
+    if (fullyDispatched) {
+      order.status = "DELIVERED";
+    }
+    else if (anyDispatched) {
+      order.status =
+        "PARTIALLY_DISPATCHED";
+    }
 
-    order.status =
-      fullyDispatched
-        ? "DELIVERED"
-        : "PARTIALLY_DISPATCHED";
 
     await order.save();
 

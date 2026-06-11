@@ -27,7 +27,8 @@ router.post(
   authMiddleware,
   authorizeRoles(
     "ADMIN",
-    "FINANCE"
+    "FINANCE",
+    "SALES",
   ),
   createInvoice
 );

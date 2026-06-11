@@ -96,19 +96,7 @@ const updateUserService =
       user.isActive =
         payload.isActive;
     }
-    if (
-      payload.password &&
-      payload.password.trim() !== ""
-    ) {
-      const hashedPassword =
-        await bcrypt.hash(
-          payload.password,
-          10
-        );
-    
-      user.password =
-        hashedPassword;
-    }
+
     await user.save();
 
     return user;

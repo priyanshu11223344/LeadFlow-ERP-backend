@@ -33,7 +33,9 @@ const createGRNService =
       );
     }
 
-    let fullyReceived = true;
+    // =================================
+    // UPDATE INVENTORY + REQUISITIONS
+    // =================================
 
     for (const item of items) {
       const inventory =
@@ -43,11 +45,10 @@ const createGRNService =
 
       if (!inventory) {
         throw new Error(
-          `Inventory item not found`
+          "Inventory item not found"
         );
       }
 
-      // Increase stock
       inventory.quantity +=
         item.receivedQuantity;
 
@@ -69,7 +70,6 @@ const createGRNService =
 
       await inventory.save();
 
-      // Update requisitions
       const requisitions =
         await PurchaseRequisition.find({
           inventoryId:
@@ -120,15 +120,11 @@ const createGRNService =
 
         await req.save();
       }
-
-      if (
-        item.receivedQuantity <
-        item.orderedQuantity
-      ) {
-        fullyReceived =
-          false;
-      }
     }
+
+    // =================================
+    // CREATE GRN
+    // =================================
 
     const grnNumber =
       await generateGRNNumber();
@@ -139,66 +135,108 @@ const createGRNService =
         vendorPurchaseOrderId,
         items,
         status:
-          fullyReceived
-            ? "RECEIVED"
-            : "PARTIALLY_RECEIVED",
+          "PARTIALLY_RECEIVED",
       });
 
-      po.status =
+    // =================================
+    // CALCULATE PO STATUS
+    // =================================
+
+    const allGRNs =
+      await GRN.find({
+        vendorPurchaseOrderId,
+      });
+
+    let fullyReceived = true;
+
+    for (const poItem of po.items) {
+      let totalReceived = 0;
+
+      for (const grnDoc of allGRNs) {
+        const grnItem =
+          grnDoc.items.find(
+            (item) =>
+              item.sku ===
+              poItem.sku
+          );
+
+        if (grnItem) {
+          totalReceived +=
+            grnItem.receivedQuantity;
+        }
+      }
+
+      if (
+        totalReceived <
+        poItem.quantity
+      ) {
+        fullyReceived = false;
+      }
+    }
+
+    po.status =
       fullyReceived
         ? "RECEIVED"
         : "PARTIALLY_RECEIVED";
-    
+
     await po.save();
-    
+
+    grn.status =
+      fullyReceived
+        ? "RECEIVED"
+        : "PARTIALLY_RECEIVED";
+
+    await grn.save();
+
     // =================================
     // REALLOCATE PENDING ORDERS
     // =================================
-    
+
     const pendingOrders =
-      await Order.find({
-        status: {
-          $in: [
-            "PENDING_PROCUREMENT",
-            "PARTIALLY_ALLOCATED",
-          ],
-        },
-      });
-    
+    await Order.find({
+      status: {
+        $in: [
+          "PENDING_PROCUREMENT",
+          "PARTIALLY_ALLOCATED",
+          "PARTIALLY_DISPATCHED",
+        ],
+      },
+    });
+
     for (const order of pendingOrders) {
       let fullyAllocated = true;
       let anyAllocated = false;
-    
+
       for (const item of order.items) {
         const shortage =
           item.quantity -
           item.allocatedQuantity;
-    
+
         if (shortage <= 0)
           continue;
-    
+
         const inventory =
           await Inventory.findById(
             item.inventoryId
           );
-    
+
         if (!inventory) {
           fullyAllocated = false;
           continue;
         }
-    
+
         if (
           inventory.quantity >=
           shortage
         ) {
           inventory.quantity -=
             shortage;
-    
+
           item.allocatedQuantity +=
             shortage;
-    
+
           anyAllocated = true;
-    
+
           if (
             inventory.quantity === 0
           ) {
@@ -214,28 +252,28 @@ const createGRNService =
             inventory.status =
               "IN_STOCK";
           }
-    
+
           await inventory.save();
         } else if (
           inventory.quantity > 0
         ) {
           item.allocatedQuantity +=
             inventory.quantity;
-    
+
           inventory.quantity = 0;
-    
+
           inventory.status =
             "OUT_OF_STOCK";
-    
+
           anyAllocated = true;
           fullyAllocated = false;
-    
+
           await inventory.save();
         } else {
           fullyAllocated = false;
         }
       }
-    
+
       if (fullyAllocated) {
         order.status =
           "ALLOCATED";
@@ -245,11 +283,9 @@ const createGRNService =
         order.status =
           "PARTIALLY_ALLOCATED";
       }
-    
+
       await order.save();
     }
-    
-    return grn;
 
     return grn;
   };
