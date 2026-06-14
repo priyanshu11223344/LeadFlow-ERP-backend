@@ -4,10 +4,7 @@ const Client = require("../models/Client");
 
 const createLeadService = async (payload) => {
   const {
-    createDeal,
-    dealName,
-    amount,
-    closeDate,
+  
     email,
   } = payload;
   let lead;
@@ -28,31 +25,11 @@ const createLeadService = async (payload) => {
   let deal = null;
 
   // AUTO CREATE DEAL
-  if (createDeal) {
-    const existingDeal=await Deal.findOne({
-      leadId:lead._id
-    })
-    if(existingDeal){
-      throw new Error(
-        "Deal already exists for this lead"
-      )
-    }
-    //else create Deal
-    deal = await Deal.create({
-      leadId: lead._id,
-      dealName,
-      amount,
-      closeDate,
-      status:"open",
-    });
-    // SAVE DEAL ID INSIDE LEAD
-    lead.dealId=deal._id;
-    await lead.save();
-  }
+  
 
   return {
     lead,
-    deal,
+
   };
 };
 
@@ -105,14 +82,17 @@ const getLeadsService = async () => {
   
           await Client.create({
             leadId: lead._id,
-  
+          
             clientName: lead.name,
-  
+          
             email: lead.email,
-  
+          
             companyName: lead.companyName,
-  
+          
             address: lead.address,
+          
+            gstNumber:
+              lead.gstNumber,
           });
         }
       }

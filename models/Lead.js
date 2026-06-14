@@ -50,7 +50,15 @@ const leadSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    phone: {
+      type: String,
+      trim: true,
+    },
+    
+    gstNumber: {
+      type: String,
+      trim: true,
+    },
     autoConvertToClient: {
       type: Boolean,
       default: false,

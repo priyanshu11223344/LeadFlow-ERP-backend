@@ -30,6 +30,10 @@ const clientSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    gstNumber: {
+      type: String,
+      trim: true,
+    }
   },
   {
     timestamps: true,

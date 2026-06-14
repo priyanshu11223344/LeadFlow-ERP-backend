@@ -41,7 +41,8 @@ router.get(
   authorizeRoles(
     "ADMIN",
     "INVENTORY_MANAGER",
-    "PROCUREMENT_MANAGER"
+    "PROCUREMENT_MANAGER",
+    "SALES",
   ),
   getInventory
 );
@@ -53,7 +54,8 @@ router.get(
   authorizeRoles(
     "ADMIN",
     "INVENTORY_MANAGER",
-    "PROCUREMENT_MANAGER"
+    "PROCUREMENT_MANAGER",
+    "SALES",
   ),
   getInventoryById
 );

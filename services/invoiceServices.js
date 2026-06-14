@@ -43,7 +43,18 @@ const createInvoiceService =
         "Dispatch not found"
       );
     }
-
+    const existingInvoice =
+    await Invoice.findOne({
+      dispatchId,
+    });
+  
+  if (
+    existingInvoice
+  ) {
+    throw new Error(
+      "Invoice already exists for this dispatch"
+    );
+  }
     const invoiceNumber =
       await generateInvoiceNumber();
 
@@ -53,9 +64,10 @@ const createInvoiceService =
         orderId,
         dispatchId,
         amount:
-          order.totalAmount,
-        dueAmount:
-          order.totalAmount,
+  order.grandTotal,
+
+dueAmount:
+  order.grandTotal,
         dueDate,
       });
 

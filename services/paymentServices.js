@@ -5,7 +5,9 @@ const Payment = require(
   const Invoice = require(
     "../models/Invoice"
   );
-  
+  const Order = require(
+    "../models/Order"
+  );
   // Generate Payment Number
   const generatePaymentNumber =
     async () => {
@@ -76,8 +78,24 @@ const Payment = require(
       }
   
       await invoice.save();
-  
-      return payment;
+
+// ========================
+// COMPLETE ORDER
+// ========================
+
+if (
+  invoice.status === "PAID"
+) {
+  await Order.findByIdAndUpdate(
+    invoice.orderId,
+    {
+      status:
+        "COMPLETED",
+    }
+  );
+}
+
+return payment;
     };
   
   // GET ALL

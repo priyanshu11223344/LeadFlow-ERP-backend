@@ -68,7 +68,30 @@ const orderSchema =
         type: Number,
         default: 0,
       },
-
+      quotationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quotation",
+      },
+      
+      subTotal: {
+        type: Number,
+        default: 0,
+      },
+      
+      totalDiscount: {
+        type: Number,
+        default: 0,
+      },
+      
+      totalTax: {
+        type: Number,
+        default: 0,
+      },
+      
+      grandTotal: {
+        type: Number,
+        default: 0,
+      },
       status: {
         type: String,
         enum: [

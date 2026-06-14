@@ -15,6 +15,15 @@ app.use(express.json());
 
 app.use("/api/leads", require("./routes/leadRoutes"));
 app.use("/api/deals", require("./routes/dealRoutes"));
+const quotationRoutes =
+  require(
+    "./routes/quotationRoutes"
+  );
+
+app.use(
+  "/api/quotations",
+  quotationRoutes
+);
 app.use("/api/clients", require("./routes/clientRoutes"));
 app.use(
   "/api/inventory",
@@ -130,6 +139,7 @@ app.use(
   "/api/audit-logs",
   auditLogRoutes
 );
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

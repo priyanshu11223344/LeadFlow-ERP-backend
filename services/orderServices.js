@@ -1,6 +1,8 @@
 const Order = require("../models/Order");
 const Client = require("../models/Client");
 const Inventory = require("../models/Inventory");
+const Quotation =
+  require("../models/Quotation");
 const PurchaseRequisition =
   require(
     "../models/PurchaseRequisition"
@@ -10,6 +12,7 @@ const PurchaseRequisition =
     const {
       clientId,
       dealId,
+      quotationId,
       poNumber,
       items,
     } = payload;
@@ -22,8 +25,17 @@ const PurchaseRequisition =
         "Client not found"
       );
     }
+    const quotation =
+  await Quotation.findById(
+    quotationId
+  );
 
-    let totalAmount = 0;
+if (!quotation) {
+  throw new Error(
+    "Quotation not found"
+  );
+}
+  
 
     let orderStatus =
       "ALLOCATED";
@@ -68,9 +80,7 @@ const PurchaseRequisition =
             orderItem.price,
         });
 
-        totalAmount +=
-          orderItem.quantity *
-          orderItem.price;
+        
 
         continue;
       }
@@ -153,19 +163,33 @@ const PurchaseRequisition =
           orderItem.price,
       });
 
-      totalAmount +=
-        requested *
-        orderItem.price;
+      
     }
 
     // CREATE ORDER
-    const order =
-  await Order.create({
+    const order =await Order.create({
     poNumber,
     clientId,
     dealId,
+    quotationId,
+
     items: processedItems,
-    totalAmount,
+
+    totalAmount:
+      quotation.subTotal,
+
+    subTotal:
+      quotation.subTotal,
+
+    totalDiscount:
+      quotation.totalDiscount,
+
+    totalTax:
+      quotation.totalTax,
+
+    grandTotal:
+      quotation.grandTotal,
+
     status: orderStatus,
   });
 
@@ -194,18 +218,21 @@ const PurchaseRequisition =
   const getOrdersService =
   async () => {
     return await Order.find()
-      .populate("clientId")
-      .populate("dealId")
-      .sort({
-        createdAt: -1,
-      });
+  .populate("clientId")
+  .populate("dealId")
+  .populate("quotationId")
+  .sort({
+    createdAt: -1,
+  });
   };
   const getOrderByIdService =
   async (id) => {
+   
     const order =
-      await Order.findById(id)
-        .populate("clientId")
-        .populate("dealId")
+    await Order.findById(id)
+      .populate("clientId")
+      .populate("dealId")
+      .populate("quotationId")
 
     if (!order) {
       throw new Error(
